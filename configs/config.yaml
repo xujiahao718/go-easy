@@ -1,3 +1,7 @@
 application:
   name: go-easy
   version: 0.0.1
+isok: true
+slice: 
+  - a
+  - b

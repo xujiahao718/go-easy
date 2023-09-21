@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"reflect"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
@@ -23,7 +24,7 @@ var (
 		Short: "start a web server",
 		Long:  `start a web server`,
 		PreRun: func(cmd *cobra.Command, args []string) {
-			initConfig()
+			initConfig(cmd)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			run()
@@ -35,9 +36,41 @@ func init() {
 	rootCmd.AddCommand(serveCmd)
 
 	serveCmd.Flags().StringVar(&cnfFile, "config", "", "config file path, default config.yaml in \".\" and \"./configs\"")
+	m := common.GetFlagMap()
+	usage := "overwrite config file"
+	for k, v := range m {
+		switch v.Type().Kind() {
+		case reflect.Bool:
+			serveCmd.Flags().Bool(k, v.Bool(), usage)
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			serveCmd.Flags().Int64(k, v.Int(), usage)
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			serveCmd.Flags().Uint64(k, v.Uint(), usage)
+		case reflect.Float32, reflect.Float64:
+			serveCmd.Flags().Float64(k, v.Float(), usage)
+		case reflect.String:
+			serveCmd.Flags().String(k, v.String(), usage)
+		case reflect.Slice:
+			et := v.Type().Elem()
+			switch et.Kind() {
+			case reflect.Bool:
+				serveCmd.Flags().BoolSlice(k, []bool{}, usage)
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+				reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+				serveCmd.Flags().Int64Slice(k, []int64{}, usage)
+			case reflect.Float32, reflect.Float64:
+				serveCmd.Flags().Float64Slice(k, []float64{}, usage)
+			case reflect.String:
+				serveCmd.Flags().StringSlice(k, []string{}, usage)
+			}
+		}
+	}
 }
 
-func initConfig() {
+func initConfig(cmd *cobra.Command) {
+	viper.Set("isok", false)
+	viper.BindPFlags(cmd.Flags())
+
 	if cnfFile != "" {
 		viper.SetConfigFile(cnfFile)
 	} else {
