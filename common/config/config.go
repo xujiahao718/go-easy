@@ -1,7 +1,7 @@
 /*
 Copyright © 2023 xujiahao <1787619881@qq.com>
 */
-package common
+package config
 
 import (
 	"fmt"
@@ -9,19 +9,7 @@ import (
 	"strings"
 )
 
-var Configs Config
-
-type Config struct {
-	Application Application `mapstructure:"application"`
-	IsOk        bool        `mapstructure:"isok"`
-	Slice       []string    `mapstructure:"slice"`
-}
-
-type Application struct {
-	Name    string `mapstructure:"name"`
-	Version string `mapstructure:"version"`
-}
-
+// GetFlagMap returns a map, which key is config key, and value is Configs's fields' reflect.Value.
 func GetFlagMap() map[string]reflect.Value {
 	m := make(map[string]reflect.Value)
 	err := parseFlagConfig("", "", Configs, &m)
@@ -41,7 +29,6 @@ func parseFlagConfig(parentKey string, name string, c interface{}, m *map[string
 
 	t := reflect.TypeOf(c)
 	v := reflect.ValueOf(c)
-	fmt.Println("===", key)
 	switch t.Kind() {
 	case reflect.Bool,
 		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,

@@ -11,7 +11,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/xujiahao718/go-easy/common"
+	"github.com/xujiahao718/go-easy/common/config"
 )
 
 var (
@@ -36,7 +36,7 @@ func init() {
 	rootCmd.AddCommand(serveCmd)
 
 	serveCmd.Flags().StringVar(&cnfFile, "config", "", "config file path, default config.yaml in \".\" and \"./configs\"")
-	m := common.GetFlagMap()
+	m := config.GetFlagMap()
 	usage := "overwrite config file"
 	for k, v := range m {
 		switch v.Type().Kind() {
@@ -89,16 +89,17 @@ func initConfig(cmd *cobra.Command) {
 
 	viper.AutomaticEnv()
 
-	viper.Unmarshal(&common.Configs)
+	viper.Unmarshal(&config.Configs)
 	// when config file changed, should unmarshal again
 	viper.OnConfigChange(func(in fsnotify.Event) {
 		fmt.Println("config file changed, update.")
-		viper.Unmarshal(&common.Configs)
+		viper.Unmarshal(&config.Configs)
 	})
 }
 
 func run() {
 	fmt.Println("server is running")
 
-	fmt.Println(common.Configs)
+	fmt.Println("welcome to ", config.Configs.Application.Name)
+	fmt.Println("version: ", config.Configs.Application.Version)
 }
