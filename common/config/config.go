@@ -9,17 +9,20 @@ import (
 	"strings"
 )
 
-// GetFlagMap returns a map, which key is config key, and value is Configs's fields' reflect.Value.
+// GetFlagMap is a function in Golang that retrieves a map. In this map,
+// each key corresponds to a configuration key,
+// while the associated value represents a reflect.Value object
+// for the respective field in the Configs struct.
 func GetFlagMap() map[string]reflect.Value {
 	m := make(map[string]reflect.Value)
-	err := parseFlagConfig("", "", Configs, &m)
+	err := fillMap(&m, "", "", Configs)
 	if err != nil {
 		panic(err)
 	}
 	return m
 }
 
-func parseFlagConfig(parentKey string, name string, c interface{}, m *map[string]reflect.Value) error {
+func fillMap(m *map[string]reflect.Value, parentKey string, name string, c interface{}) error {
 	var key string
 	if parentKey != "" && name != "" {
 		key = parentKey + "." + name
@@ -43,7 +46,7 @@ func parseFlagConfig(parentKey string, name string, c interface{}, m *map[string
 			f := t.Field(i)
 			fv := v.Field(i)
 			n := strings.ToLower(f.Name)
-			err := parseFlagConfig(key, n, fv.Interface(), m)
+			err := fillMap(m, key, n, fv.Interface())
 			if err != nil {
 				return err
 			}

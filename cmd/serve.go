@@ -68,7 +68,6 @@ func init() {
 }
 
 func initConfig(cmd *cobra.Command) {
-	viper.Set("isok", false)
 	viper.BindPFlags(cmd.Flags())
 
 	if cnfFile != "" {
